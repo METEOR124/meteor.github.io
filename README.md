@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Успеваемость: классный журнал для учителя</title>
+    <!-- Google Fonts & simple CSS reset -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f7ff;
+            color: #1e293b;
+            padding: 24px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* header & карточки */
+        .dashboard-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            gap: 16px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #1e3c72, #2b4c7c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 28px;
+            padding: 18px 24px;
+            flex: 1 1 180px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .stat-card:hover { transform: translateY(-3px); background: #ffffff;}
+
+        .stat-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            color: #5b6e8c;
+        }
+
+        .stat-value {
+            font-size: 2.3rem;
+            font-weight: 700;
+            margin-top: 8px;
+            color: #0f2b3d;
+        }
+
+        /* панель управления */
+        .action-bar {
+            background: white;
+            border-radius: 32px;
+            padding: 20px 28px;
+            margin-bottom: 28px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            justify-content: space-between;
+            align-items: flex-end;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            border: 1px solid #e9eef3;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 140px;
+        }
+
+        .form-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #3a5a7a;
+        }
+
+        input, select, button {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            border-radius: 60px;
+            border: 1px solid #cfdfed;
+            padding: 10px 16px;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2c7da0;
+            box-shadow: 0 0 0 3px rgba(44,125,160,0.2);
+        }
+
+        button {
+            background: #2c7da0;
+            border: none;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 10px 24px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        button:hover {
+            background: #1f5e7e;
+            transform: scale(0.97);
+        }
+
+        .btn-outline {
+            background: white;
+            border: 1px solid #bdd4e7;
+            color: #1e4a6e;
+        }
+        .btn-outline:hover {
+            background: #eef4fc;
+            transform: none;
+        }
+
+        .btn-red-light {
+            background: #fff0f0;
+            color: #b91c1c;
+            border: 1px solid #ffcdcd;
+        }
+        .btn-red-light:hover {
+            background: #ffe0e0;
+        }
+
+        /* таблица */
+        .table-wrapper {
+            background: white;
+            border-radius: 28px;
+            overflow-x: auto;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.05);
+            border: 1px solid #eef2f8;
+            padding: 4px 0;
+        }
+
+        .students-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 700px;
+        }
+
+        .students-table th {
+            text-align: left;
+            padding: 16px 12px;
+            background: #f8fafd;
+            font-weight: 600;
+            color: #1f4662;
+            border-bottom: 1px solid #e2edf7;
+        }
+
+        .students-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #eff3f8;
+            vertical-align: middle;
+        }
+
+        .student-name {
+            font-weight: 600;
+            color: #0c4e6e;
+        }
+
+        .grade-badge {
+            display: inline-block;
+            background: #eef2ff;
+            padding: 4px 10px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin: 2px 4px 2px 0;
+            color: #1e3a5f;
+        }
+
+        .grade-input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .grade-input-group input {
+            width: 65px;
+            padding: 6px 8px;
+            border-radius: 28px;
+            text-align: center;
+        }
+
+        .grade-input-group button {
+            padding: 6px 14px;
+            font-size: 0.75rem;
+        }
+
+        .delete-student {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #a0bbd4;
+            padding: 4px 8px;
+        }
+        .delete-student:hover { color: #d9534f; background: none; transform: none;}
+
+        .empty-row td {
+            text-align: center;
+            padding: 48px;
+            color: #8ba0bc;
+            font-style: italic;
+        }
+
+        .avg-grade {
+            font-weight: 700;
+            background: #ecfdf5;
+            border-radius: 24px;
+            padding: 4px 10px;
+            display: inline-block;
+            font-size: 0.8rem;
+        }
+
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #6f8fae;
+        }
+        @media (max-width: 680px) {
+            body { padding: 16px; }
+            .stat-value { font-size: 1.8rem; }
+            .action-bar { flex-direction: column; align-items: stretch; }
+            .form-group button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="dashboard-header">
+        <h1>📚 Классный журнал · Успеваемость</h1>
+        <small style="color:#4b6f8e;">контроль знаний, прогресс учеников</small>
+    </div>
+
+    <!-- Блок статистики (динамический) -->
+    <div class="stats-cards" id="statsContainer">
+        <div class="stat-card"><div class="stat-title">👥 Всего учеников</div><div class="stat-value" id="totalStudents">0</div></div>
+        <div class="stat-card"><div class="stat-title">⭐ Средний балл (класс)</div><div class="stat-value" id="classAvg">0.0</div></div>
+        <div class="stat-card"><div class="stat-title">📝 Всего оценок</div><div class="stat-value" id="totalGrades">0</div></div>
+        <div class="stat-card"><div class="stat-title">🏆 Отличники (>4.5)</div><div class="stat-value" id="excellentCount">0</div></div>
+    </div>
+
+    <!-- Панель добавления ученика / выбора предмета -->
+    <div class="action-bar">
+        <div class="form-group">
+            <label>📌 Имя и фамилия ученика</label>
+            <input type="text" id="studentNameInput" placeholder="Например: Анна Григорьева" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label>➕ Добавить в класс</label>
+            <button id="addStudentBtn">➕ Добавить ученика</button>
+        </div>
+        <div class="form-group">
+            <label>📖 Предмет (фильтр/контекст)</label>
+            <select id="subjectSelect">
+                <option value="Математика">📐 Математика</option>
+                <option value="Русский язык">📖 Русский язык</option>
+                <option value="Литература">📚 Литература</option>
+                <option value="Физика">⚛️ Физика</option>
+                <option value="История">🏛️ История</option>
+                <option value="Биология">🔬 Биология</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>🎯 Быстрая оценка (1-5)</label>
+            <div style="display: flex; gap: 6px;">
+                <input type="number" id="quickGradeInput" min="1" max="5" step="1" placeholder="5" style="width: 70px;">
+                <button id="quickGradeForSelectedBtn" class="btn-outline">Поставить выбранному</button>
+            </div>
+            <small style="font-size: 0.7rem;">выберите ученика в таблице → оценка по предмету</small>
+        </div>
+    </div>
+
+    <!-- Таблица успеваемости -->
+    <div class="table-wrapper">
+        <table class="students-table" id="studentsTable">
+            <thead>
+                <tr>
+                    <th>Ученик</th>
+                    <th>Предмет / Оценки</th>
+                    <th>Средний балл</th>
+                    <th style="width: 140px;">Действия</th>
+                </tr>
+                </thead>
+                <tbody id="tableBody">
+                <tr class="empty-row"><td colspan="4">✨ Загрузите демо-данные или добавьте первого ученика</td></tr>
+                </tbody>
+        </table>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+        <button id="loadDemoBtn" class="btn-outline">📋 Загрузить демо-класс</button>
+        <button id="resetAllBtn" class="btn-red-light">🗑️ Сбросить всех учеников</button>
+    </div>
+    <footer>Учитель может добавлять/удалять учеников, выставлять оценки по разным предметам. Автоматический расчёт успеваемости и статистики.</footer>
+</div>
+
+<script>
+    // ---------- Модель данных ----------
+    // Структура: ученик = { id, name, grades: [{ subject, value }] }
+    let students = [];
+
+    // Вспомогательные ID
+    let nextId = 1;
+
+    // DOM элементы
+    const tableBody = document.getElementById('tableBody');
+    const totalStudentsSpan = document.getElementById('totalStudents');
+    const classAvgSpan = document.getElementById('classAvg');
+    const totalGradesSpan = document.getElementById('totalGrades');
+    const excellentCountSpan = document.getElementById('excellentCount');
+
+    const studentNameInput = document.getElementById('studentNameInput');
+    const addStudentBtn = document.getElementById('addStudentBtn');
+    const subjectSelect = document.getElementById('subjectSelect');
+    const quickGradeInput = document.getElementById('quickGradeInput');
+    const quickGradeForSelectedBtn = document.getElementById('quickGradeForSelectedBtn');
+    const loadDemoBtn = document.getElementById('loadDemoBtn');
+    const resetAllBtn = document.getElementById('resetAllBtn');
+
+    // Выбранный ученик (для быстрой оценки)
+    let selectedStudentId = null;
+
+    // ---------- Функции обновления UI и статистики ----------
+    function computeStats() {
+        const total = students.length;
+        let sumAllAverages = 0;
+        let totalGradesCount = 0;
+        let excellentStudents = 0;
+
+        students.forEach(student => {
+            const gradesArr = student.grades;
+            totalGradesCount += gradesArr.length;
+            // средний балл ученика (по всем его оценкам)
+            let avg = 0;
+            if (gradesArr.length > 0) {
+                const sum = gradesArr.reduce((acc, g) => acc + g.value, 0);
+                avg = sum / gradesArr.length;
+                sumAllAverages += avg;
+            } else {
+                avg = 0;
+            }
+            // отличник: средний балл >= 4.5 и хотя бы 1 оценка? по логике учителя
+            if (avg >= 4.5 && gradesArr.length > 0) excellentStudents++;
+        });
+
+        const classAverage = total === 0 ? 0 : (sumAllAverages / total);
+        totalStudentsSpan.innerText = total;
+        classAvgSpan.innerText = classAverage.toFixed(2);
+        totalGradesSpan.innerText = totalGradesCount;
+        excellentCountSpan.innerText = excellentStudents;
+    }
+
+    // рендер всей таблицы
+    function renderTable() {
+        if (students.length === 0) {
+            tableBody.innerHTML = `<tr class="empty-row"><td colspan="4">👩‍🏫 Нет учеников. Добавьте первого или загрузите демо-класс</td></tr>`;
+            computeStats();
+            return;
+        }
+
+        let html = '';
+        students.forEach(student => {
+            // собираем оценки с группировкой по предметам для удобного отображения
+            const gradesMap = new Map(); // subject -> массив значений
+            student.grades.forEach(grade => {
+                if (!gradesMap.has(grade.subject)) gradesMap.set(grade.subject, []);
+                gradesMap.get(grade.subject).push(grade.value);
+            });
+
+            // формируем строку с оценками по предметам
+            let gradesHtml = '';
+            for (let [subject, values] of gradesMap.entries()) {
+                const valuesStr = values.join(', ');
+                gradesHtml += `<div class="grade-badge"><strong>${subject}</strong> ${valuesStr}</div>`;
+            }
+            if (gradesHtml === '') gradesHtml = '<span style="color:#8ba0bc;">нет оценок</span>';
+
+            // средний балл ученика (общий)
+            let studentAvg = 0;
+            if (student.grades.length > 0) {
+                const sum = student.grades.reduce((acc, g) => acc + g.value, 0);
+                studentAvg = sum / student.grades.length;
+            } else {
+                studentAvg = 0;
+            }
+            const avgDisplay = student.grades.length === 0 ? '—' : studentAvg.toFixed(2);
+            const avgClass = student.grades.length === 0 ? '' : 'avg-grade';
+
+            // выделяем строку, если выбран
+            const rowSelectedAttr = (selectedStudentId === student.id) ? 'style="background-color:#f1f9fe;"' : '';
+
+            html += `<tr data-student-id="${student.id}" ${rowSelectedAttr}>
+                        <td class="student-name">${escapeHtml(student.name)}</td>
+                        <td>${gradesHtml}</td>
+                        <td><span class="${avgClass}">${avgDisplay}</span></td>
+                        <td>
+                            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                <button class="add-grade-btn btn-outline" data-id="${student.id}" style="padding: 4px 12px; font-size:0.75rem;">➕ оценка</button>
+                                <button class="delete-student" data-id="${student.id}" title="Удалить ученика">🗑️</button>
+                            </div>
+                        </td>
+                     </tr>`;
+        });
+        tableBody.innerHTML = html;
+
+        // привязываем события к кнопкам "➕ оценка" и удаления
+        document.querySelectorAll('.add-grade-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const sId = parseInt(btn.getAttribute('data-id'));
+                openGradeDialog(sId);
+            });
+        });
+
+        document.querySelectorAll('.delete-student').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const sId = parseInt(btn.getAttribute('data-id'));
+                deleteStudentById(sId);
+            });
+        });
+
+        // клик по строке для выделения (выбор ученика)
+        document.querySelectorAll('#studentsTable tbody tr').forEach(row => {
+            const studentIdAttr = row.getAttribute('data-student-id');
+            if (studentIdAttr) {
+                row.addEventListener('click', (e) => {
+                    // не срабатывает если клик по кнопкам внутри (stopPropagation уже есть)
+                    const id = parseInt(studentIdAttr);
+                    if (selectedStudentId === id) {
+                        selectedStudentId = null; // снять выделение
+                    } else {
+                        selectedStudentId = id;
+                    }
+                    renderTable(); // перерисовать чтобы подсветить
+                });
+            }
+        });
+
+        computeStats();
+    }
+
+    // диалог добавления оценки через prompt (простой, но функциональный)
+    function openGradeDialog(studentId) {
+        const student = students.find(s => s.id === studentId);
+        if (!student) return;
+        const currentSubject = subjectSelect.value;
+        // запрос оценки
+        let gradeVal = prompt(`Введите оценку для ${student.name} по предмету "${currentSubject}" (от 1 до 5):`, '5');
+        if (gradeVal === null) return;
+        gradeVal = gradeVal.trim();
+        let gradeNumber = parseInt(gradeVal, 10);
+        if (isNaN(gradeNumber) || gradeNumber < 1 || gradeNumber > 5) {
+            alert('Оценка должна быть числом от 1 до 5');
+            return;
+        }
+        addGradeToStudent(studentId, currentSubject, gradeNumber);
+    }
+
+    function addGradeToStudent(studentId, subject, value) {
+        const student = students.find(s => s.id === studentId);
+        if (!student) return;
+        student.grades.push({ subject: subject, value: value });
+        renderTable();
+        // дополнительно уведомление
+        const studentName = student.name;
+        showToastMessage(`✅ ${studentName} получил(а) ${value} по ${subject}`);
+    }
+
+    // быстрая оценка для выбранного ученика (из селекта предмета и инпута)
+    function quickGradeForSelected() {
+        if (selectedStudentId === null) {
+            alert('Сначала выберите ученика в таблице (кликните на строку ученика)');
+            return;
+        }
+        const student = students.find(s => s.id === selectedStudentId);
+        if (!student) {
+            selectedStudentId = null;
+            renderTable();
+            alert('Ученик не найден, выберите заново');
+            return;
+        }
+        let gradeRaw = quickGradeInput.value;
+        if (gradeRaw === '') gradeRaw = '5';
+        let gradeNum = parseInt(gradeRaw, 10);
+        if (isNaN(gradeNum) || gradeNum < 1 || gradeNum > 5) {
+            alert('Оценка должна быть целым числом от 1 до 5');
+            return;
+        }
+        const subject = subjectSelect.value;
+        addGradeToStudent(selectedStudentId, subject, gradeNum);
+        quickGradeInput.value = ''; 
+    }
+
+    // добавление нового ученика
+    function addStudent() {
+        let name = studentNameInput.value.trim();
+        if (name === '') {
+            alert('Введите имя ученика');
+            return;
+        }
+        // проверка дубликата не строгая, но можно
+        const exists = students.some(s => s.name.toLowerCase() === name.toLowerCase());
+        if (exists) {
+            if (!confirm('Ученик с похожим именем уже есть. Всё равно добавить?')) return;
+        }
+        const newStudent = {
+            id: nextId++,
+            name: name,
+            grades: []
+        };
+        students.push(newStudent);
+        studentNameInput.value = '';
+        renderTable();
+        showToastMessage(`👩‍🎓 Добавлен ${name}`);
+    }
+
+    function deleteStudentById(id) {
+        const student = students.find(s => s.id === id);
+        if (!student) return;
+        if (confirm(`Удалить ученика "${student.name}" и все его оценки?`)) {
+            students = students.filter(s => s.id !== id);
+            if (selectedStudentId === id) selectedStudentId = null;
+            renderTable();
+            showToastMessage(`🗑️ ${student.name} удалён`);
+        }
+    }
+
+    function resetAllStudents() {
+        if (students.length > 0 && confirm('⚠️ Удалить ВСЕХ учеников и все оценки? Отменить нельзя.')) {
+            students = [];
+            selectedStudentId = null;
+            renderTable();
+            showToastMessage('Все ученики удалены');
+        } else if (students.length === 0) {
+            alert('Список и так пуст');
+        }
+    }
+
+    // демо-данные: несколько учеников с оценками
+    function loadDemoClass() {
+        if (students.length > 0 && !confirm('Загрузка демо-класса заменит текущих учеников. Продолжить?')) return;
+        // сброс
+        students = [];
+        nextId = 1;
+        selectedStudentId = null;
+
+        const demoStudents = [
+            { name: 'Алиса Селезнёва', grades: [{subject:'Математика', value:5},{subject:'Русский язык',value:4},{subject:'Физика',value:5}] },
+            { name: 'Борис Николаев', grades: [{subject:'Математика',value:3},{subject:'Литература',value:5},{subject:'История',value:4}] },
+            { name: 'Виктория Морозова', grades: [{subject:'Биология',value:5},{subject:'Химия',value:4},{subject:'Математика',value:4}] },
+            { name: 'Глеб Соколов', grades: [{subject:'Физика',value:3},{subject:'Математика',value:2},{subject:'Русский язык',value:3}] },
+            { name: 'Дарья Калинина', grades: [{subject:'Литература',value:5},{subject:'История',value:5},{subject:'Английский',value:5}] },
+            { name: 'Егор Титов', grades: [{subject:'Математика',value:4},{subject:'Физика',value:4},{subject:'Информатика',value:5}] }
+        ];
+        for (const demo of demoStudents) {
+            students.push({
+                id: nextId++,
+                name: demo.name,
+                grades: [...demo.grades]
+            });
+        }
+        renderTable();
+        showToastMessage('📚 Загружен демо-класс с 6 учениками и оценками');
+    }
+
+    // простой тост (временное сообщение)
+    let toastTimeout = null;
+    function showToastMessage(msg) {
+        let toast = document.getElementById('dynamicToast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'dynamicToast';
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.backgroundColor = '#1e293b';
+            toast.style.color = 'white';
+            toast.style.padding = '10px 20px';
+            toast.style.borderRadius = '40px';
+            toast.style.fontSize = '0.85rem';
+            toast.style.fontWeight = '500';
+            toast.style.zIndex = '999';
+            toast.style.boxShadow = '0 8px 20px rgba(0,0,0,0.2)';
+            toast.style.backdropFilter = 'blur(4px)';
+            document.body.appendChild(toast);
+        }
+        toast.innerText = msg;
+        toast.style.opacity = '1';
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => { if(toast) toast.style.visibility = 'hidden'; }, 300);
+        }, 2200);
+        toast.style.visibility = 'visible';
+    }
+
+    // защита от XSS
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+
+    // инициализация обработчиков
+    function init() {
+        addStudentBtn.addEventListener('click', addStudent);
+        quickGradeForSelectedBtn.addEventListener('click', quickGradeForSelected);
+        loadDemoBtn.addEventListener('click', loadDemoClass);
+        resetAllBtn.addEventListener('click', resetAllStudents);
+        // дополнительно можно Enter в поле имени
+        studentNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addStudent();
+        });
+        renderTable(); // пустой старт
+    }
+
+    init();
+</script>
+</body>
+</html>
